@@ -1,0 +1,31 @@
+name: Install Helm SSM Plugin
+description: Install Helm SSM Plugin
+author: Robson Andrade
+
+runs:
+  using: 'composite'
+  steps:
+    - name: '[helm_ssm] download installer'
+      shell: bash
+      run: |
+        curl -LO https://github.com/codacy/helm-ssm/releases/download/3.1.9/helm-ssm-linux.tgz 
+
+    - name: '[helm_ssm] create config folders'
+      id: folders
+      shell: bash
+      run: |
+        export HELM_PLUGIN_DIR=$(helm env | grep HELM_PLUGINS | cut -d\" -f2)/helm-ssm 
+        mkdir -p $HELM_PLUGIN_DIR 
+        mkdir -p _dist/helm-ssm 
+        echo HELM_PLUGIN_DIR=$HELM_PLUGIN_DIR >> $GITHUB_ENV
+
+    - name: '[helm_ssm ] install plugin'
+      shell: bash
+      run: |
+        tar -xf helm-ssm-linux.tgz -C _dist/helm-ssm 
+        cp -r _dist/helm-ssm/* ${{ env.HELM_PLUGIN_DIR }}
+
+    - name: '[helm_ssm] clean up'
+      shell: bash
+      run: |
+        rm -rf _dist/ 
